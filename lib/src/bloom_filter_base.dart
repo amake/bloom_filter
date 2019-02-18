@@ -49,7 +49,7 @@ class BloomFilter<E> {
   /// Adds an element to the Bloom filter. The output from the element's
   /// toString() method is used as input to the hash functions.
   void add(E element) {
-    List<int> hashes = _createHashes(UTF8.encode(element.toString()), _k);
+    List<int> hashes = _createHashes(utf8.encode(element.toString()), _k);
     for (int hash in hashes) {
       _bitVector.set((hash % _bitVectorSize).abs());
     }
@@ -66,9 +66,9 @@ class BloomFilter<E> {
   /// Returns true if the element could have been inserted into the Bloom
   /// filter, false if this is definitely not the case.
   bool mightContain(E element) {
-    List<int> hashes = _createHashes(UTF8.encode(element.toString()), _k);
+    List<int> hashes = _createHashes(utf8.encode(element.toString()), _k);
     for (int hash in hashes) {
-      if (!_bitVector.get((hash % _bitVectorSize).abs())) {
+      if (!_bitVector.has((hash % _bitVectorSize).abs())) {
         return false;
       }
     }
