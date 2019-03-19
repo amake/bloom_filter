@@ -7,8 +7,8 @@ void main() {
   double falsePositiveProbability = 0.1;
   int expectedSize = 100;
 
-  BloomFilter<String> bloomFilter =
-      new BloomFilter<String>(falsePositiveProbability, expectedSize);
+  BloomFilter<String> bloomFilter = new BloomFilter<String>.withProbability(
+      falsePositiveProbability, expectedSize);
 
   bloomFilter.add("foo");
 

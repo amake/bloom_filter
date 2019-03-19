@@ -10,34 +10,58 @@ import 'package:crypto/crypto.dart';
 /// A implementation of Bloom filter, as described by
 /// https://en.wikipedia.org/wiki/Bloom_filter
 class BloomFilter<E> {
-  final BitVector _bitVector;
-  final int _bitVectorSize;
-  final int _expectedNumOfElements;
-  int _numOfAddedElements;
-  final int _k;
-
   /// Constructs an empty Bloom filter with a given false positive probability.
   /// The number of bits per element and the number of hash functions is
   /// estimated to match the false positive probability.
-  factory BloomFilter(
+  factory BloomFilter.withProbability(
       double falsePositiveProbability, int expectedNumberOfElements) {
     final c = (-(log(falsePositiveProbability) / log(2))).ceil() /
         log(2); // c = k / ln(2)
     final k = ((-(log(falsePositiveProbability) / log(2))).ceil())
         .toInt(); // k = ceil(-log_2(false prob.))
-    return new BloomFilter._internal(c, expectedNumberOfElements, k);
+    return new BloomFilter(c, expectedNumberOfElements, k);
   }
 
-  BloomFilter._internal(double c, int n, int k)
-      : _expectedNumOfElements = n,
-        _k = k,
-        _bitVectorSize = (c * n).ceil(),
+  factory BloomFilter.withSize(int bitSetSize, int expectedNumberOfElements) {
+    final double c = bitSetSize / expectedNumberOfElements;
+    final int n = expectedNumberOfElements;
+    final int k = ((bitSetSize / expectedNumberOfElements) * log(2)).round();
+    return new BloomFilter(c, n, k);
+  }
+
+  BloomFilter(double bitsPerElement, int expectedElements, int hashFunctions)
+      : _expectedNumOfElements = expectedElements,
+        _k = hashFunctions,
+        _bitVectorSize = (bitsPerElement * expectedElements).ceil(),
         _numOfAddedElements = 0,
-        _bitVector = new BitVector((c * n).ceil());
+        _bitVector = new BitVector((bitsPerElement * expectedElements).ceil());
+
+  final BitVector _bitVector;
+  final int _bitVectorSize;
+  final int _expectedNumOfElements;
+  int _numOfAddedElements;
+  final int _k; // number of hash functions
 
   /// The number of elements added to the Bloom filter after is was constructed
   /// or after clear() was called.
   int get length => _numOfAddedElements;
+
+  List<bool> getBits() {
+    final out = <bool>[];
+    for (var i = 0; i < _bitVectorSize; i++)
+      out.add(_bitVector[i] ? true : false);
+    return out;
+  }
+
+  void setBits(List<bool> data) {
+    for (var i = 0; i < data.length; i++) {
+      if (data[i]) _bitVector.set(i);
+    }
+  }
+
+  Map<int, bool> toMap() =>
+      Map.fromIterable(List<int>.generate(_bitVectorSize, (int i) => i),
+          key: (var i) => i, value: (var i) => _bitVector[i]);
 
   /// The probability of a false positive given the expected number of inserted
   /// elements.
