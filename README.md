@@ -1,7 +1,5 @@
 # bloom_filter
 
-[![Build Status](https://travis-ci.org/kseo/bloom_filter.svg?branch=master)](https://travis-ci.org/kseo/bloom_filter)
-
 A stand-alone Bloom filter implementation written in Dart inspired by
 [Java-BloomFilter][Java-BloomFilter].
 
@@ -13,7 +11,7 @@ Bloom filters are used for set membership tests. They are fast and
 space-efficient at the cost of accuracy. Although there is a certain probability
 of error, Bloom filters never produce false negatives.
 
-## Examples
+## Usage example
 
 To create an empty Bloom filter, just call the constructor with the required
 false positive probability and the number of elements you expect to add to the
@@ -23,8 +21,8 @@ Bloom filter.
 double falsePositiveProbability = 0.1;
 int expectedNumberOfElements = 100;
 
-BloomFilter<String> bloomFilter = new
-BloomFilter<String>(falsePositiveProbability, expectedNumberOfElements);
+BloomFilter bloomFilter = new
+BloomFilter<String>.withProbability(falsePositiveProbability, expectedNumberOfElements);
 ```
 
 The constructor chooses a length and number of hash functions which will provide
@@ -52,31 +50,30 @@ the Bloom filter, but it may also return true for elements which have not been
 added. The accuracy can be estimated using the
 `expectedFalsePositiveProbability` getter.
 
-Put together, here is the full example.
+## Saving & restoring a bloom filter
+
+Lets create a bloom filter which is 10 bits in size that expects 3 elements to be added to it:
 
 ```dart
-import 'package:bloom_filter/bloom_filter.dart';
-
-main() {
-  double falsePositiveProbability = 0.1;
-  int expectedSize = 100;
-
-  BloomFilter<String> bloomFilter =
-      new BloomFilter<String>(falsePositiveProbability, expectedSize);
-
-  bloomFilter.add("foo");
-
-  if (bloomFilter.mightContain("foo")) {
-    // Always returns true
-    print("BloomFilter contains foo!");
-    print(
-        "Probability of a false positive: ${bloomFilter.expectedFalsePositiveProbability}");
-  }
-
-  if (bloomFilter.mightContain("bar")) {
-    // Should return false, but could return true
-    print("There was a false positive.");
-  }
-}
+BloomFilter b = new BloomFilter.withSize(10, 3);
 ```
 
+Lets add some values to it:
+
+```dart
+for (var i = 0; i < 3; i++) b.add(i.toRadixString(2));
+```
+
+We can then extract the bits which can then be stored:
+
+```dart
+final List<bool> bits = b.getBits();
+// [true, false, true, true, true, false, true, false, true, false]
+```
+
+We can then recreate the bloom filter like so:
+
+```dart
+BloomFilter b2 = new BloomFilter.withSize(10, 3)
+    ..setBits(bits);
+```
