@@ -4,7 +4,7 @@
 import 'dart:convert';
 import 'dart:math' show exp, log, pow;
 
-import 'package:bit_vector/bit_vector.dart';
+import 'bit_vector_web.dart';
 import 'package:crypto/crypto.dart';
 
 /// A implementation of Bloom filter, as described by
@@ -28,13 +28,23 @@ class BloomFilter<E> {
     final int k = ((bitSetSize / expectedNumberOfElements) * log(2)).round();
     return new BloomFilter(c, n, k);
   }
+  factory BloomFilter.withSizeAndBitVector(
+      int bitSetSize, int expectedNumberOfElements, List<String> bitVector) {
+    final double c = bitSetSize / expectedNumberOfElements;
+    final int n = expectedNumberOfElements;
+    final int k = ((bitSetSize / expectedNumberOfElements) * log(2)).round();
+    return new BloomFilter(c, n, k, bitVector: bitVector);
+  }
 
-  BloomFilter(double bitsPerElement, int expectedElements, int hashFunctions)
+  BloomFilter(double bitsPerElement, int expectedElements, int hashFunctions,
+      {List<String> bitVector})
       : _expectedNumOfElements = expectedElements,
         _k = hashFunctions,
         _bitVectorSize = (bitsPerElement * expectedElements).ceil(),
         _numOfAddedElements = 0,
-        _bitVector = new BitVector((bitsPerElement * expectedElements).ceil());
+        _bitVector = bitVector == null
+            ? new BitVector((bitsPerElement * expectedElements).ceil())
+            : BitVector.fromWordsString(bitVector);
 
   final BitVector _bitVector;
   final int _bitVectorSize;
@@ -45,6 +55,12 @@ class BloomFilter<E> {
   /// The number of elements added to the Bloom filter after is was constructed
   /// or after clear() was called.
   int get length => _numOfAddedElements;
+
+  @override
+  String toString() => _bitVector.toString();
+
+  @override
+  List<String> bitVectorListForStorage() => _bitVector.toListforStorage();
 
   List<bool> getBits() {
     final out = <bool>[];

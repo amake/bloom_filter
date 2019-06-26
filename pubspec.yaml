@@ -5,14 +5,14 @@ author: Kwang Yul Seo <kwangyul.seo@gmail.com>
 homepage: https://github.com/kseo/bloom_filter
 
 environment:
-  sdk: '>=2.0.0 <3.0.0'
+  sdk: ">=2.0.0 <3.0.0"
 
 dependencies:
-  bit_vector: ^0.3.0
   crypto: ^2.0.1
+  fixnum: any
 
 dependency_overrides:
-  bit_vector: 
+  bit_vector:
     path: ../bit_vector/
 
 dev_dependencies:

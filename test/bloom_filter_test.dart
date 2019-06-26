@@ -30,22 +30,18 @@ void main() {
     });
 
     test('BloomFilter.withSize', () {
-      BloomFilter b = new BloomFilter.withSize(10, 3);
-
-      for (var i = 0; i < 10; i++) {
-        b.add(i.toRadixString(2));
-        expect(b.getBits().length, equals(10));
-      }
+      BloomFilter b = new BloomFilter.withSize(10, 5);
+      expect(b.getBits().length, equals(10));
     });
 
     test('getBits and setBits', () {
-      BloomFilter b = new BloomFilter.withSize(10, 3);
+      BloomFilter b = new BloomFilter.withSize(20, 10);
 
       for (var i = 0; i < 10; i++) {
         b.add(i.toRadixString(2));
       }
 
-      BloomFilter b2 = new BloomFilter.withSize(10, 3)..setBits(b.getBits());
+      BloomFilter b2 = new BloomFilter.withSize(20, 10)..setBits(b.getBits());
 
       expect(b.getBits(), equals(b2.getBits()));
 
@@ -56,15 +52,44 @@ void main() {
     });
 
     test('toMap', () {
-      BloomFilter b = new BloomFilter.withSize(10, 3);
+      BloomFilter b = new BloomFilter.withSize(20, 10);
 
-      for (var i = 0; i < 10; i++) {
-        b.add(i.toRadixString(2));
-      }
+      for (var i = 0; i < 10; i++) b.add(i.toRadixString(2));
+
       final bits = b.getBits();
       final map = b.toMap();
 
       expect(bits[0], map[0]);
+    });
+
+    test('Jimmys test', () {
+      BloomFilter bf = BloomFilter.withSize(8000, 2389);
+
+      final userRef = 'HjWeN1NjllnZlJ1mIbCc';
+      bf.add(userRef);
+      print(bf);
+
+      int lastIndex = -1;
+      List<int> bitIndex = [];
+      final bits = bf.getBits();
+      while (true) {
+        lastIndex = bits.indexOf(true, lastIndex + 1);
+        if (lastIndex == -1) break;
+        bitIndex.add(lastIndex);
+      }
+      print(bitIndex);
+    });
+
+    test('Store as 64', () {
+      BloomFilter b = new BloomFilter.withSize(1000, 300);
+
+      for (var i = 0; i < 300; i++) b.add(i.toRadixString(2));
+
+      final bitVector = b.bitVectorListForStorage();
+      print(bitVector);
+      BloomFilter b2 = new BloomFilter.withSizeAndBitVector(20, 10, bitVector);
+
+      // expect(b == b2, true);
     });
   });
 }
