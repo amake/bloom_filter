@@ -32,9 +32,10 @@ class BloomFilter<E> {
     final List<int> indexes = [];
 
     for (int hash in hashes) {
-      indexes.add((hash % bitSetSize).abs());
+      final indexPosition = (hash % bitSetSize).abs();
+      if (!indexes.contains(indexPosition)) indexes.add(indexPosition);
     }
-
+    indexes.sort();
     return indexes;
   }
 
@@ -116,8 +117,10 @@ class BloomFilter<E> {
     final List<int> indexes = [];
     var hashes = _createHashes(utf8.encode(element.toString()), _k);
     for (int hash in hashes) {
-      indexes.add((hash % _bitVectorSize).abs());
+      final indexPosition = (hash % _bitVectorSize).abs();
+      if (!indexes.contains(indexPosition)) indexes.add(indexPosition);
     }
+    indexes.sort();
     return indexes;
   }
 
