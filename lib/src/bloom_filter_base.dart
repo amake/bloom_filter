@@ -35,7 +35,6 @@ class BloomFilter<E> {
       final indexPosition = (hash % bitSetSize).abs();
       if (!indexes.contains(indexPosition)) indexes.add(indexPosition);
     }
-    indexes.sort();
     return indexes;
   }
 
@@ -120,7 +119,6 @@ class BloomFilter<E> {
       final indexPosition = (hash % _bitVectorSize).abs();
       if (!indexes.contains(indexPosition)) indexes.add(indexPosition);
     }
-    indexes.sort();
     return indexes;
   }
 
