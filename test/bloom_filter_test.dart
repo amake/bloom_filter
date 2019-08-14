@@ -4,6 +4,7 @@
 import 'package:bloom_filter/bloom_filter.dart';
 import 'package:test/test.dart';
 import 'package:uuid/uuid.dart';
+import 'package:collection/collection.dart';
 
 void main() {
   group('BloomFilter', () {
@@ -90,6 +91,23 @@ void main() {
       BloomFilter b2 = new BloomFilter.withSizeAndBitVector(20, 10, bitVector);
 
       // expect(b == b2, true);
+    });
+
+    test('hashes', () {
+      String data = 'jimmy';
+      int size = 814237;
+      int expectedItems = 50000;
+
+      BloomFilter b = new BloomFilter.withSize(size, expectedItems);
+      var bh = b.hashIndexes(data);
+
+      var bh2 =
+          BloomFilter.hashIndexesWithSize<String>(size, expectedItems, data);
+      print(bh);
+      print(bh2);
+
+      Function eq = const ListEquality().equals;
+      expect(eq(bh, bh2), true);
     });
   });
 }

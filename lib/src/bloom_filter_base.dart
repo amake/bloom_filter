@@ -22,6 +22,22 @@ class BloomFilter<E> {
     return new BloomFilter(c, expectedNumberOfElements, k);
   }
 
+  static List<int> hashIndexesWithSize<E>(
+      int bitSetSize, int expectedNumberOfElements, E data) {
+    final double c = bitSetSize / expectedNumberOfElements;
+    final int n = expectedNumberOfElements;
+    final int k = ((bitSetSize / expectedNumberOfElements) * log(2)).round();
+
+    final hashes = _createHashes(utf8.encode(data.toString()), k);
+    final List<int> indexes = [];
+
+    for (int hash in hashes) {
+      indexes.add((hash % bitSetSize).abs());
+    }
+
+    return indexes;
+  }
+
   factory BloomFilter.withSize(int bitSetSize, int expectedNumberOfElements) {
     final double c = bitSetSize / expectedNumberOfElements;
     final int n = expectedNumberOfElements;
@@ -94,6 +110,15 @@ class BloomFilter<E> {
       _bitVector.set((hash % _bitVectorSize).abs());
     }
     _numOfAddedElements++;
+  }
+
+  List<int> hashIndexes(E element) {
+    final List<int> indexes = [];
+    var hashes = _createHashes(utf8.encode(element.toString()), _k);
+    for (int hash in hashes) {
+      indexes.add((hash % _bitVectorSize).abs());
+    }
+    return indexes;
   }
 
   /// Adds all elements to the Bloom filter.

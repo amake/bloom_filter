@@ -10,6 +10,7 @@ environment:
 dependencies:
   crypto: ^2.0.1
   fixnum: any
+  collection: any
 
 dependency_overrides:
   bit_vector:
