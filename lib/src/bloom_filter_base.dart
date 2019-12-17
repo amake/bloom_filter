@@ -73,6 +73,9 @@ class BloomFilter<E> {
   /// or after clear() was called.
   int get length => _numOfAddedElements;
 
+  /// The size of the bit vector
+  int get bitVectorSize => _bitVectorSize;
+
   @override
   String toString() => _bitVector.toString();
 
