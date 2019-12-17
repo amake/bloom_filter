@@ -1,10 +1,12 @@
 // Copyright (c) 2016, kseo. All rights reserved. Use of this source code
 // is governed by a BSD-style license that can be found in the LICENSE file.
 
+import 'dart:typed_data';
+
 import 'package:bloom_filter/bloom_filter.dart';
+import 'package:collection/collection.dart';
 import 'package:test/test.dart';
 import 'package:uuid/uuid.dart';
-import 'package:collection/collection.dart';
 
 void main() {
   group('BloomFilter', () {
@@ -88,7 +90,8 @@ void main() {
 
       final bitVector = b.bitVectorListForStorage();
       print(bitVector);
-      BloomFilter b2 = new BloomFilter.withSizeAndBitVector(20, 10, bitVector);
+      BloomFilter b2 = new BloomFilter.withSizeAndBitVector(
+          20, 10, Uint32List.fromList(bitVector).buffer);
 
       // expect(b == b2, true);
     });

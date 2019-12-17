@@ -3,8 +3,9 @@
 
 import 'dart:convert';
 import 'dart:math' show exp, log, pow;
+import 'dart:typed_data';
 
-import 'bit_vector_web.dart';
+import 'package:bit_array/bit_array.dart';
 import 'package:crypto/crypto.dart';
 
 /// A implementation of Bloom filter, as described by
@@ -45,7 +46,7 @@ class BloomFilter<E> {
     return new BloomFilter(c, n, k);
   }
   factory BloomFilter.withSizeAndBitVector(
-      int bitSetSize, int expectedNumberOfElements, List<String> bitVector) {
+      int bitSetSize, int expectedNumberOfElements, ByteBuffer bitVector) {
     final double c = bitSetSize / expectedNumberOfElements;
     final int n = expectedNumberOfElements;
     final int k = ((bitSetSize / expectedNumberOfElements) * log(2)).round();
@@ -53,16 +54,16 @@ class BloomFilter<E> {
   }
 
   BloomFilter(double bitsPerElement, int expectedElements, int hashFunctions,
-      {List<String> bitVector})
+      {ByteBuffer bitVector})
       : _expectedNumOfElements = expectedElements,
         _k = hashFunctions,
         _bitVectorSize = (bitsPerElement * expectedElements).ceil(),
         _numOfAddedElements = 0,
         _bitVector = bitVector == null
-            ? new BitVector((bitsPerElement * expectedElements).ceil())
-            : BitVector.fromWordsString(bitVector);
+            ? new BitArray((bitsPerElement * expectedElements).ceil())
+            : BitArray.fromByteBuffer(bitVector);
 
-  final BitVector _bitVector;
+  final BitArray _bitVector;
   final int _bitVectorSize;
   final int _expectedNumOfElements;
   int _numOfAddedElements;
@@ -75,8 +76,7 @@ class BloomFilter<E> {
   @override
   String toString() => _bitVector.toString();
 
-  @override
-  List<String> bitVectorListForStorage() => _bitVector.toListforStorage();
+  List<int> bitVectorListForStorage() => _bitVector.asUint32Iterable();
 
   List<bool> getBits() {
     final out = <bool>[];
@@ -87,7 +87,7 @@ class BloomFilter<E> {
 
   void setBits(List<bool> data) {
     for (var i = 0; i < data.length; i++) {
-      if (data[i]) _bitVector.set(i);
+      if (data[i]) _bitVector.setBit(i);
     }
   }
 
@@ -107,7 +107,7 @@ class BloomFilter<E> {
   void add(E element) {
     List<int> hashes = _createHashes(utf8.encode(element.toString()), _k);
     for (int hash in hashes) {
-      _bitVector.set((hash % _bitVectorSize).abs());
+      _bitVector.setBit((hash % _bitVectorSize).abs());
     }
     _numOfAddedElements++;
   }
@@ -134,7 +134,7 @@ class BloomFilter<E> {
   bool mightContain(E element) {
     List<int> hashes = _createHashes(utf8.encode(element.toString()), _k);
     for (int hash in hashes) {
-      if (!_bitVector.has((hash % _bitVectorSize).abs())) {
+      if (!_bitVector[(hash % _bitVectorSize).abs()]) {
         return false;
       }
     }
