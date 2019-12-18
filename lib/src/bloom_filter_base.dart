@@ -76,9 +76,6 @@ class BloomFilter<E> {
   /// The size of the bit vector
   int get bitVectorSize => _bitVectorSize;
 
-  @override
-  String toString() => _bitVector.toString();
-
   List<int> bitVectorListForStorage() => _bitVector.asUint32Iterable();
 
   List<bool> getBits() {
