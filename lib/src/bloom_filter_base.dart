@@ -20,7 +20,7 @@ class BloomFilter<E> {
         log(2); // c = k / ln(2)
     final k = ((-(log(falsePositiveProbability) / log(2))).ceil())
         .toInt(); // k = ceil(-log_2(false prob.))
-    return new BloomFilter(c, expectedNumberOfElements, k);
+    return new BloomFilter._cnk(c, expectedNumberOfElements, k);
   }
 
   static List<int> hashIndexesWithSize<E>(
@@ -40,27 +40,30 @@ class BloomFilter<E> {
   }
 
   factory BloomFilter.withSize(int bitSetSize, int expectedNumberOfElements) {
-    final double c = bitSetSize / expectedNumberOfElements;
-    final int n = expectedNumberOfElements;
     final int k = ((bitSetSize / expectedNumberOfElements) * log(2)).round();
-    return new BloomFilter(c, n, k);
-  }
-  factory BloomFilter.withSizeAndBitVector(
-      int bitSetSize, int expectedNumberOfElements, ByteBuffer bitVector) {
-    final double c = bitSetSize / expectedNumberOfElements;
-    final int n = expectedNumberOfElements;
-    final int k = ((bitSetSize / expectedNumberOfElements) * log(2)).round();
-    return new BloomFilter(c, n, k, bitVector: bitVector);
+    return new BloomFilter._(bitSetSize, expectedNumberOfElements, k, null);
   }
 
-  BloomFilter(double bitsPerElement, int expectedElements, int hashFunctions,
-      {ByteBuffer bitVector})
+  factory BloomFilter.withSizeAndBitVector(
+      int bitSetSize, int expectedNumberOfElements, ByteBuffer bitVector) {
+    final int k = ((bitSetSize / expectedNumberOfElements) * log(2)).round();
+    return new BloomFilter._(
+        bitSetSize, expectedNumberOfElements, k, bitVector);
+  }
+
+  BloomFilter._cnk(
+      double bitsPerElement, int expectedElements, int hashFunctions)
+      : this._((bitsPerElement * expectedElements).ceil(), expectedElements,
+            hashFunctions, null);
+
+  BloomFilter._(int bitVectorSize, int expectedElements, int hashFunctions,
+      ByteBuffer bitVector)
       : _expectedNumOfElements = expectedElements,
         _k = hashFunctions,
-        _bitVectorSize = (bitsPerElement * expectedElements).ceil(),
+        _bitVectorSize = bitVectorSize,
         _numOfAddedElements = 0,
         _bitVector = bitVector == null
-            ? new BitArray((bitsPerElement * expectedElements).ceil())
+            ? new BitArray(bitVectorSize)
             : BitArray.fromByteBuffer(bitVector);
 
   final BitArray _bitVector;

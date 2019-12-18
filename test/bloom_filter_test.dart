@@ -112,5 +112,23 @@ void main() {
       Function eq = const ListEquality().equals;
       expect(eq(bh, bh2), true);
     });
+
+    test('Copy', () {
+      final items = 43063;
+      final b1 = BloomFilter.withProbability(0.01, items);
+      for (int i = 0; i < items; i++) {
+        b1.add(i);
+      }
+      for (int i = 0; i < items; i++) {
+        expect(b1.mightContain(i), true);
+      }
+      print(b1.bitVectorSize);
+      final b2 = BloomFilter.withSizeAndBitVector(b1.bitVectorSize, items,
+          Uint32List.fromList(b1.bitVectorListForStorage()).buffer);
+      expect(b1.bitVectorSize == b2.bitVectorSize, true);
+      for (int i = 0; i < items; i++) {
+        b2.mightContain(i);
+      }
+    });
   });
 }
